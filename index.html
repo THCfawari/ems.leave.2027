@@ -2,8 +2,8 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2027 Annual Leave Planner - Company B</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>2027 Annual Leave Planner - THC / OCC EMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
@@ -12,6 +12,9 @@
             background-color: #f8fafc;
             user-select: none;
             -webkit-user-select: none;
+        }
+        .custom-scrollbar {
+            -webkit-overflow-scrolling: touch;
         }
         .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
@@ -27,6 +30,14 @@
             max-width: 345px;
             background-color: #ffffff;
             box-shadow: 4px 0 10px -4px rgba(15, 23, 42, 0.08);
+        }
+
+        @media (max-width: 640px) {
+            .sticky-emp-col {
+                width: 185px;
+                min-width: 185px;
+                max-width: 185px;
+            }
         }
 
         .blocked-day-shaded {
@@ -59,14 +70,14 @@
 <body class="text-slate-800 min-h-screen flex flex-col">
 
     <!-- Toast Notifications -->
-    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-md w-full pointer-events-none px-4 sm:px-0"></div>
+    <div id="toastContainer" class="fixed bottom-4 right-3 left-3 sm:left-auto sm:right-5 z-50 flex flex-col gap-2 sm:max-w-md pointer-events-none"></div>
 
     <!-- Top Header -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
-        <div class="max-w-[1640px] mx-auto px-3 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+        <div class="max-w-[1640px] mx-auto px-3 sm:px-6 py-2.5 sm:py-3 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3">
             <!-- Brand Title & Live Connection Badge -->
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-xs shrink-0">
+            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-xs shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                         <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -74,26 +85,26 @@
                         <line x1="3" y1="10" x2="21" y2="10"></line>
                     </svg>
                 </div>
-                <div>
+                <div class="min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
-                        <h1 class="text-base sm:text-lg font-extrabold text-slate-900">2027 Annual Leave Planner</h1>
-                        <span id="cloudStatusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                        <h1 class="text-sm sm:text-lg font-extrabold text-slate-900 truncate">2027 Annual Leave Planner (EMS)</h1>
+                        <span id="cloudStatusBadge" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
                             <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                             <span id="cloudStatusText">Connecting...</span>
                         </span>
                     </div>
-                    <p class="text-xs text-slate-500 mt-0.5">Quota: 22 Working Days | Max 2 Periods/Year, Min 10 Consecutive Working Days Each (Excl. Fri &amp; Sat)</p>
+                    <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-snug">
+                        Quota: <strong>22d</strong> (Optional 0–5d Emergency Reserve) | Max 2 Periods (1 Period ≥ 10d; 2 Periods Total 17–22d, Excl. Fri &amp; Sat)
+                    </p>
                 </div>
             </div>
 
             <!-- Right Header Controls -->
-            <div class="flex items-center gap-2 flex-wrap no-print">
-                <!-- My Row / All Rows Toggle (Visible when an employee unlocks their row) -->
+            <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap no-print w-full sm:w-auto justify-end">
                 <button type="button" data-action="toggle-row-filter" id="rowFilterBtn" class="hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 transition">
                     <span id="rowFilterBtnText">My Row Only</span>
                 </button>
 
-                <!-- Admin Header Controls (Strictly Hidden Until Admin Login) -->
                 <div id="adminHeaderControls" class="hidden items-center gap-1.5 flex-wrap">
                     <button type="button" data-action="add-employee" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition">
                         <span>+ Add Employee</span>
@@ -102,10 +113,10 @@
                         <span>+ Add Type</span>
                     </button>
                     <button type="button" data-action="open-generate-pins-modal" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-700 text-white shadow-xs transition">
-                        <span>Generate All PINs</span>
+                        <span>Generate PINs</span>
                     </button>
                     <button type="button" data-action="copy-all-pins" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 transition">
-                        <span>Copy All PINs</span>
+                        <span>Copy PINs</span>
                     </button>
                     <button type="button" data-action="open-range-modal" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition">
                         <span>Global Block</span>
@@ -124,8 +135,7 @@
                     </button>
                 </div>
 
-                <!-- Admin Login / Exit Admin Button -->
-                <button type="button" data-action="toggle-admin" id="adminToggleBtn" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-900 text-white shadow-xs transition">
+                <button type="button" data-action="toggle-admin" id="adminToggleBtn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-900 text-white shadow-xs transition">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                     <span id="adminToggleBtnText">Admin Login</span>
                 </button>
@@ -134,34 +144,28 @@
     </header>
 
     <!-- Main Workspace -->
-    <main class="max-w-[1640px] w-full mx-auto px-2 sm:px-6 py-4 space-y-3.5 flex-1">
+    <main class="max-w-[1640px] w-full mx-auto px-2 sm:px-6 py-3 sm:py-4 space-y-3 flex-1">
 
-        <!-- ========================================================= -->
         <!-- Admin Top Statistics & Legend Bar (ADMIN ONLY) -->
-        <!-- ========================================================= -->
         <section id="adminStatsAndLegendSection" class="hidden space-y-3 no-print">
-            <div id="adminSummaryCardsGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
-            <div id="adminLegendBar" class="bg-white rounded-2xl px-4 py-2.5 border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-2 text-xs"></div>
+            <div id="adminSummaryCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3"></div>
+            <div id="adminLegendBar" class="bg-white rounded-2xl px-3.5 py-2.5 border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-2 text-xs"></div>
         </section>
 
-        <!-- ========================================================= -->
         <!-- Admin Brush Toolbar (ADMIN ONLY) -->
-        <!-- ========================================================= -->
-        <section id="adminBrushToolbar" class="hidden bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs space-y-2.5 no-print">
+        <section id="adminBrushToolbar" class="hidden bg-white rounded-2xl p-3 sm:p-3.5 border border-slate-200 shadow-xs space-y-2.5 no-print">
             <div class="flex flex-wrap items-center justify-between gap-2">
-                <div id="adminBrushButtonsContainer" class="flex flex-wrap items-center gap-2"></div>
+                <div id="adminBrushButtonsContainer" class="flex flex-wrap items-center gap-1.5 sm:gap-2"></div>
                 <div class="text-[11px] font-medium text-slate-600 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
-                    <strong>Admin Tip:</strong> Click or drag across cells to paint. Placing Annual Leave (✓) on a Global Block date automatically exempts that employee.
+                    <strong>Admin Tip:</strong> Tap or drag across cells to paint. Placing Annual Leave (✓) on a Global Block date automatically exempts that employee.
                 </div>
             </div>
         </section>
 
-        <!-- ========================================================= -->
         <!-- Employee Eid Holiday Work Preference Bar (UNLOCKED ROW ONLY) -->
-        <!-- ========================================================= -->
-        <section id="employeeEidPreferenceBar" class="hidden bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4 no-print">
+        <section id="employeeEidPreferenceBar" class="hidden bg-white rounded-2xl p-3 sm:p-3.5 border border-slate-200 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 no-print">
             <div class="flex items-center gap-3 min-w-0">
-                <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-lg shrink-0">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-lg shrink-0">
                     🌙
                 </div>
                 <div class="min-w-0">
@@ -174,36 +178,34 @@
                 </div>
             </div>
 
-            <div class="flex flex-wrap items-center gap-3">
-                <!-- Eid Al-Fitr Card -->
-                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex flex-col gap-2 min-w-[250px]">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 w-full lg:w-auto">
+                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex flex-col gap-2">
                     <div class="text-xs font-extrabold text-slate-800">
                         Eid Al-Fitr <span class="font-semibold text-slate-500">(عيد الفطر)</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <button type="button" data-action="set-eid-pref" data-holiday="fitr" data-value="willing" id="btnEidFitrWilling"
-                            class="flex-1 px-3 py-1.5 rounded-lg border text-xs font-bold transition bg-white text-slate-700 border-slate-200 hover:bg-slate-50">
+                            class="flex-1 px-2.5 py-1.5 rounded-lg border text-xs font-bold transition bg-white text-slate-700 border-slate-200 hover:bg-slate-50">
                             ✓ Willing to Work
                         </button>
                         <button type="button" data-action="set-eid-pref" data-holiday="fitr" data-value="off" id="btnEidFitrOff"
-                            class="flex-1 px-3 py-1.5 rounded-lg border text-xs font-bold transition bg-white text-slate-700 border-slate-200 hover:bg-slate-50">
+                            class="flex-1 px-2.5 py-1.5 rounded-lg border text-xs font-bold transition bg-white text-slate-700 border-slate-200 hover:bg-slate-50">
                             ✗ Prefer Off
                         </button>
                     </div>
                 </div>
 
-                <!-- Eid Al-Adha Card -->
-                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex flex-col gap-2 min-w-[250px]">
+                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex flex-col gap-2">
                     <div class="text-xs font-extrabold text-slate-800">
                         Eid Al-Adha <span class="font-semibold text-slate-500">(عيد الأضحى)</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <button type="button" data-action="set-eid-pref" data-holiday="adha" data-value="willing" id="btnEidAdhaWilling"
-                            class="flex-1 px-3 py-1.5 rounded-lg border text-xs font-bold transition bg-white text-slate-700 border-slate-200 hover:bg-slate-50">
+                            class="flex-1 px-2.5 py-1.5 rounded-lg border text-xs font-bold transition bg-white text-slate-700 border-slate-200 hover:bg-slate-50">
                             ✓ Willing to Work
                         </button>
                         <button type="button" data-action="set-eid-pref" data-holiday="adha" data-value="off" id="btnEidAdhaOff"
-                            class="flex-1 px-3 py-1.5 rounded-lg border text-xs font-bold transition bg-white text-slate-700 border-slate-200 hover:bg-slate-50">
+                            class="flex-1 px-2.5 py-1.5 rounded-lg border text-xs font-bold transition bg-white text-slate-700 border-slate-200 hover:bg-slate-50">
                             ✗ Prefer Off
                         </button>
                     </div>
@@ -211,30 +213,33 @@
             </div>
         </section>
 
-        <!-- 12-Month Navigation Tabs (Visible to Everyone) -->
-        <section class="bg-white rounded-2xl p-2.5 border border-slate-200 shadow-xs flex items-center justify-between gap-2 no-print">
-            <button type="button" data-action="prev-month" class="px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold transition shrink-0">
-                ← Prev
+        <!-- 12-Month Navigation Tabs -->
+        <section class="bg-white rounded-2xl p-2 sm:p-2.5 border border-slate-200 shadow-xs flex items-center justify-between gap-1.5 sm:gap-2 no-print">
+            <button type="button" data-action="prev-month" class="px-2.5 sm:px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold transition shrink-0">
+                ← <span class="hidden sm:inline">Prev</span>
             </button>
-            <div id="monthTabsContainer" class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar py-1 px-1 flex-1 justify-start sm:justify-center"></div>
-            <button type="button" data-action="next-month" class="px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold transition shrink-0">
-                Next →
+            <div id="monthTabsContainer" class="flex items-center gap-1 sm:gap-1.5 overflow-x-auto custom-scrollbar py-1 px-1 flex-1 justify-start sm:justify-center"></div>
+            <button type="button" data-action="next-month" class="px-2.5 sm:px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold transition shrink-0">
+                <span class="hidden sm:inline">Next</span> →
             </button>
         </section>
 
-        <!-- Full 365-Day 2027 Interactive Calendar Matrix (Visible to Everyone) -->
+        <!-- Mobile Quick Instruction Banner -->
+        <div class="sm:hidden bg-sky-50 border border-sky-200 rounded-xl px-3 py-2 text-[11px] text-sky-900 font-semibold flex items-center justify-between gap-2 no-print">
+            <span>👆 Tap your row to enter PIN &amp; book (17–22d planned, 0–5d reserve). Swipe table left/right.</span>
+        </div>
+
+        <!-- Full 365-Day 2027 Interactive Calendar Matrix -->
         <section class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
             <div id="scheduleTableWrapper" class="overflow-x-auto custom-scrollbar"></div>
         </section>
 
-        <!-- ========================================================= -->
         <!-- Admin Booking Priority Order Timestamp Log (ADMIN ONLY) -->
-        <!-- ========================================================= -->
         <section id="adminPriorityLogSection" class="hidden bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden no-print">
             <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
                 <div class="flex items-center gap-2">
                     <span class="w-2.5 h-2.5 rounded-full bg-sky-600"></span>
-                    <h2 class="text-sm font-extrabold text-slate-900">Booking Priority Order &amp; Timestamp Audit Log</h2>
+                    <h2 class="text-xs sm:text-sm font-extrabold text-slate-900">Booking Priority Order &amp; Timestamp Audit Log</h2>
                     <span id="priorityLogCountBadge" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-sky-100 text-sky-800">0 periods</span>
                 </div>
                 <p class="text-[11px] font-medium text-slate-500">Sorted chronologically by earliest booking timestamp (First-Come, First-Served Priority)</p>
@@ -248,7 +253,7 @@
     <!-- Modals -->
     <!-- ========================================================= -->
 
-    <!-- 1. Admin Login Modal (Zero Default PIN Hints) -->
+    <!-- 1. Admin Login Modal -->
     <div id="adminPassModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl border border-slate-200 space-y-4">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -317,7 +322,7 @@
         </div>
     </div>
 
-    <!-- 4. Enter 4-Digit PIN Modal (Employee Verification) -->
+    <!-- 4. Enter 4-Digit PIN Modal -->
     <div id="empVerifyPinModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl border border-slate-200 space-y-4">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -338,9 +343,9 @@
         </div>
     </div>
 
-    <!-- 5. Admin Employee Management Modal (Name, Work Email, Individual Lock, PIN, Outlook Dispatch, Reset Eid, Delete) -->
+    <!-- 5. Admin Employee Management Modal -->
     <div id="editEmpModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-xl border border-slate-200 space-y-4">
+        <div class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-5 shadow-xl border border-slate-200 space-y-4">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 class="text-base font-extrabold text-slate-900">Manage Employee Profile &amp; PIN</h3>
                 <button type="button" data-action="close-modal" data-modal="editEmpModal" class="px-2 py-1 rounded-lg hover:bg-slate-100 text-slate-500 font-bold text-xs">✕</button>
@@ -377,7 +382,6 @@
                     </div>
                 </div>
 
-                <!-- Send via Outlook Button -->
                 <div class="pt-1">
                     <button type="button" data-action="save-and-send-outlook-modal"
                         class="w-full py-2.5 px-4 rounded-xl text-xs font-extrabold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition flex items-center justify-center gap-2">
@@ -433,7 +437,7 @@
         </div>
     </div>
 
-    <!-- 7. Admin Add Custom Leave/Status Type Modal (+ Add Type) -->
+    <!-- 7. Admin Add Custom Leave/Status Type Modal -->
     <div id="addTypeModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl border border-slate-200 space-y-4">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -563,7 +567,7 @@
         import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
         // =========================================================
-        // 1. Hardcoded Firebase Configuration for Company B
+        // 1. Hardcoded Firebase Configuration for Company B (EMS)
         // =========================================================
         const DB_PATH = "emsleave_planner_2027";
         const firebaseConfig = {
@@ -580,11 +584,13 @@
         const LOCAL_STORAGE_KEY = `planner_2027_${DB_PATH}`;
         const ADMIN_SESSION_KEY = `planner_2027_admin_session_${DB_PATH}`;
         const YEAR = 2027;
-        const MAX_BALANCE = 22;
+        const MAX_BALANCE = 22;          // الحد الأقصى للإجازات المخططة 22 يوماً
+        const MAX_EMERGENCY_RESERVE = 5; // يمكن إبقاء 0 إلى 5 أيام كحد أقصى للطوارئ
+        const MIN_TWO_PERIOD_TOTAL = MAX_BALANCE - MAX_EMERGENCY_RESERVE; // 17 يوماً
         const MAX_PERIODS = 2;
-        const MIN_CONSECUTIVE_DAYS = 10;
+        const MIN_CONSECUTIVE_DAYS = 10; // يجب أن تكون إحدى الفترتين >= 10 أيام متصلة على الأقل
         const MAX_OVERLAP = 2;
-        const WEEKEND_DAYS = [5, 6]; // 5 = Friday, 6 = Saturday
+        const WEEKEND_DAYS = [5, 6];     // 5 = Friday, 6 = Saturday
         const DEFAULT_ADMIN_PIN = "1234";
 
         const MONTHS_SHORT_EN = [
@@ -625,7 +631,7 @@
             showOnlyMyRow: false,
             adminBrush: "L",
             employees: createDefaultEmployees(12),
-            entries: {},         // entries[empId]["YYYY-MM-DD"] = { type: "L" | "T" | customCode, ts: number, bookedAt: string }
+            entries: {},
             globalBlocks: {},
             customTypes: [],
             globalLock: false,
@@ -633,7 +639,6 @@
             dailySummary: {}
         };
 
-        // Drag Selection State
         let isDragging = false;
         let dragMode = null;
         let dragEmpId = null;
@@ -642,7 +647,6 @@
         let dragCurrentDate = null;
         let dragVisited = new Set();
 
-        // Firebase Runtime State
         let db = null;
         let plannerRef = null;
         let initialCloudChecked = false;
@@ -809,11 +813,11 @@
             if (!badge || !dot || !text) return;
 
             if (mode === "connected") {
-                badge.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200";
+                badge.className = "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200";
                 dot.className = "w-2 h-2 rounded-full bg-emerald-500";
                 text.textContent = "Live Cloud Sync";
             } else {
-                badge.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200";
+                badge.className = "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200";
                 dot.className = "w-2 h-2 rounded-full bg-amber-500";
                 text.textContent = "Offline • Local Cache";
             }
@@ -1085,19 +1089,60 @@
             return list;
         }
 
-        // Automatic Sanitizer: Immediately cancels any leave block shorter than 10 consecutive working days
-        function enforceSubTenDayAutoCancel(empId, simulatedRow) {
+        // =========================================================
+        // 5. Flexible Policy Validation:
+        // - Max 22 planned working days (0 to 5 days emergency reserve allowed)
+        // - Max 2 periods per year
+        // - At least ONE period must be >= 10 consecutive working days
+        // - Period 1 can be 7 days if Period 2 is >= 10 days (total 17..22d)
+        // - Period 1 can be >= 10 days and Period 2 completes 17..22d
+        // =========================================================
+        function validateAndEnforceLeavePolicy(empId, simulatedRow) {
             const runs = getContiguousAnnualLeaveRuns(empId, simulatedRow);
-            let cancelledCount = 0;
-            for (const run of runs) {
-                if (run.length < MIN_CONSECUTIVE_DAYS) {
-                    for (const item of run) {
-                        delete simulatedRow[item.dateStr];
-                    }
-                    cancelledCount++;
-                }
+            if (runs.length === 0) {
+                return { ok: true, cancelled: false, message: "" };
             }
-            return cancelledCount;
+
+            if (runs.length > MAX_PERIODS) {
+                return { ok: false, cancelled: false, message: `Maximum ${MAX_PERIODS} leave periods allowed per year.` };
+            }
+
+            const totalDays = runs.reduce((acc, r) => acc + r.length, 0);
+            if (totalDays > MAX_BALANCE) {
+                return { ok: false, cancelled: false, message: `Exceeds your ${MAX_BALANCE}-day annual leave quota.` };
+            }
+
+            const hasTenDayPeriod = runs.some(r => r.length >= MIN_CONSECUTIVE_DAYS);
+
+            if (runs.length === 1) {
+                if (runs[0].length < 5) {
+                    for (const item of runs[0]) delete simulatedRow[item.dateStr];
+                    return {
+                        ok: true,
+                        cancelled: true,
+                        message: "Minimum leave period length is 5 days (with a 10+ day period required)."
+                    };
+                }
+                return { ok: true, cancelled: false, message: "" };
+            }
+
+            if (!hasTenDayPeriod) {
+                return {
+                    ok: false,
+                    cancelled: false,
+                    message: "At least one of your two leave periods must be 10 consecutive working days or more."
+                };
+            }
+
+            if (totalDays < MIN_TWO_PERIOD_TOTAL) {
+                return {
+                    ok: false,
+                    cancelled: false,
+                    message: `Combined total of 2 leave periods must be at least ${MIN_TWO_PERIOD_TOTAL} working days (max ${MAX_EMERGENCY_RESERVE}d emergency reserve). Currently: ${totalDays}d.`
+                };
+            }
+
+            return { ok: true, cancelled: false, message: "" };
         }
 
         function findAdjacentLeaveRunMeta(empId, targetDateStr) {
@@ -1122,9 +1167,6 @@
             return { ts: earliest.ts, bookedAt: earliest.bookedAt };
         }
 
-        // =========================================================
-        // 5. Strict Employee Auto-Booking & Auto-Cancellation Guard
-        // =========================================================
         function handleEmployeeSingleClick(emp, m, d, dateStr) {
             const empKey = String(emp.id);
             const currentRow = state.entries[empKey] || {};
@@ -1140,7 +1182,7 @@
                 return;
             }
 
-            // Case 1: Clicked on existing Annual Leave cell -> Trim edge (if >10) or clear whole period
+            // Case 1: Clicked on existing Annual Leave cell -> Trim edge or clear period
             if (existing && existing.type === "L") {
                 const runs = getContiguousAnnualLeaveRuns(emp.id, simulatedRow);
                 const targetRun = runs.find(run => run.some(item => item.dateStr === dateStr));
@@ -1149,7 +1191,7 @@
                     const isFirstEdge = targetRun[0].dateStr === dateStr;
                     const isLastEdge = targetRun[targetRun.length - 1].dateStr === dateStr;
 
-                    if (targetRun.length > MIN_CONSECUTIVE_DAYS && (isFirstEdge || isLastEdge)) {
+                    if (targetRun.length > 1 && (isFirstEdge || isLastEdge)) {
                         delete simulatedRow[dateStr];
                     } else {
                         for (const item of targetRun) {
@@ -1160,14 +1202,15 @@
                     delete simulatedRow[dateStr];
                 }
 
-                const autoCancelled = enforceSubTenDayAutoCancel(emp.id, simulatedRow);
+                const check = validateAndEnforceLeavePolicy(emp.id, simulatedRow);
+                if (!check.ok && targetRun) {
+                    for (const item of targetRun) delete simulatedRow[item.dateStr];
+                    validateAndEnforceLeavePolicy(emp.id, simulatedRow);
+                }
+
                 state.entries[empKey] = simulatedRow;
                 persistState();
-                if (autoCancelled > 0) {
-                    showToast("Leave periods under 10 working days were automatically cancelled.", "warning");
-                } else {
-                    showToast("Annual leave updated.", "info");
-                }
+                showToast(check.cancelled ? check.message : "Annual leave updated.", check.cancelled ? "warning" : "info");
                 return;
             }
 
@@ -1197,74 +1240,81 @@
                     return;
                 }
 
-                const autoCancelled = enforceSubTenDayAutoCancel(emp.id, simulatedRow);
                 state.entries[empKey] = simulatedRow;
                 persistState();
-                if (autoCancelled > 0) {
-                    showToast("Leave periods under 10 working days were automatically cancelled.", "warning");
-                } else {
-                    showToast(`Extended leave period (${totalUsed}/${MAX_BALANCE} days used).`, "success");
-                }
+                const reserveLeft = MAX_BALANCE - totalUsed;
+                showToast(`Extended leave period (${totalUsed}/${MAX_BALANCE}d booked • ${reserveLeft}d reserve).`, "success");
                 return;
             }
 
-            // Case 3: Clicked an isolated empty working day -> Auto-fill 10 consecutive working days
-            const tenDays = getNextNWorkingDays(dateStr, MIN_CONSECUTIVE_DAYS);
-            if (tenDays.length < MIN_CONSECUTIVE_DAYS) {
-                enforceSubTenDayAutoCancel(emp.id, simulatedRow);
-                state.entries[empKey] = simulatedRow;
-                persistState();
-                showToast("Leave periods under 10 working days were automatically cancelled.", "warning");
+            // Case 3: Clicked an isolated empty working day -> Smart Auto-Fill
+            const alreadyUsed = getEmpAnnualLeaveUsed(emp.id, simulatedRow);
+            const existingRuns = getContiguousAnnualLeaveRuns(emp.id, simulatedRow);
+
+            if (existingRuns.length >= MAX_PERIODS) {
+                showToast(`Maximum ${MAX_PERIODS} leave periods allowed per year.`, "error");
+                return;
+            }
+
+            const remainingFull = MAX_BALANCE - alreadyUsed;
+            if (remainingFull <= 0) {
+                showToast(`You have already booked all ${MAX_BALANCE} working days.`, "error");
+                return;
+            }
+
+            let autoBookLen = MIN_CONSECUTIVE_DAYS;
+            if (existingRuns.length === 1) {
+                const firstLen = existingRuns[0].length;
+                if (firstLen < MIN_CONSECUTIVE_DAYS) {
+                    autoBookLen = MIN_CONSECUTIVE_DAYS;
+                } else {
+                    const to17 = MIN_TWO_PERIOD_TOTAL - firstLen;
+                    autoBookLen = to17 > 0 ? to17 : remainingFull;
+                }
+            }
+
+            if (autoBookLen > remainingFull) autoBookLen = remainingFull;
+
+            const candidateDays = getNextNWorkingDays(dateStr, autoBookLen);
+            if (candidateDays.length < autoBookLen) {
+                showToast(`Not enough consecutive working days left in 2027 to book ${autoBookLen} days.`, "error");
                 return;
             }
 
             const bookingTs = Date.now();
             const bookingIso = new Date(bookingTs).toISOString();
-            for (let idx = 0; idx < tenDays.length; idx++) {
-                const item = tenDays[idx];
+            for (const item of candidateDays) {
                 if (isBlockedForEmp(emp, item.m, item.d)) {
-                    showToast(`Cannot auto-book 10 days: ${MONTHS_SHORT_EN[item.m]} ${item.d} falls in a Global Block Period.`, "error");
+                    showToast(`Cannot auto-book ${autoBookLen} days: ${MONTHS_SHORT_EN[item.m]} ${item.d} falls in a Global Block Period.`, "error");
                     return;
                 }
-                const cellExisting = simulatedRow[item.dateStr];
-                if (cellExisting) {
-                    showToast(`Cannot auto-book 10 days: Overlaps with existing entry on ${MONTHS_SHORT_EN[item.m]} ${item.d}.`, "error");
+                if (simulatedRow[item.dateStr]) {
+                    showToast(`Cannot auto-book ${autoBookLen} days: Overlaps with existing entry on ${MONTHS_SHORT_EN[item.m]} ${item.d}.`, "error");
                     return;
                 }
                 const dayStat = state.dailySummary[item.dateStr] || { count: 0, bookings: [] };
                 if (dayStat.count >= MAX_OVERLAP) {
-                    showToast(`Cannot auto-book 10 days: ${MONTHS_SHORT_EN[item.m]} ${item.d} has reached the 2/2 daily limit.`, "error");
+                    showToast(`Cannot auto-book ${autoBookLen} days: ${MONTHS_SHORT_EN[item.m]} ${item.d} has reached the 2/2 daily limit.`, "error");
                     return;
                 }
                 simulatedRow[item.dateStr] = { type: "L", ts: bookingTs, bookedAt: bookingIso };
             }
 
-            const totalUsed = getEmpAnnualLeaveUsed(emp.id, simulatedRow);
-            if (totalUsed > MAX_BALANCE) {
-                const rem = Math.max(0, MAX_BALANCE - getEmpAnnualLeaveUsed(emp.id));
-                showToast(`Cannot book 10 days: Only ${rem} working days remaining in your quota.`, "error");
+            const check = validateAndEnforceLeavePolicy(emp.id, simulatedRow);
+            if (!check.ok) {
+                showToast(check.message, "error");
                 return;
             }
 
-            const periods = analyzeAnnualLeavePeriods(emp.id, simulatedRow);
-            if (periods.length > MAX_PERIODS) {
-                showToast(`Cannot book: Maximum ${MAX_PERIODS} leave periods allowed per year.`, "error");
-                return;
-            }
-
-            const autoCancelled = enforceSubTenDayAutoCancel(emp.id, simulatedRow);
             state.entries[empKey] = simulatedRow;
             persistState();
-            if (autoCancelled > 0) {
-                showToast("Leave periods under 10 working days were automatically cancelled.", "warning");
-            } else {
-                const firstDay = tenDays[0];
-                const lastDay = tenDays[tenDays.length - 1];
-                showToast(
-                    `Booked 10 working days (${MONTHS_SHORT_EN[firstDay.m]} ${firstDay.d} – ${MONTHS_SHORT_EN[lastDay.m]} ${lastDay.d}).`,
-                    "success"
-                );
-            }
+            const firstDay = candidateDays[0];
+            const lastDay = candidateDays[candidateDays.length - 1];
+            const newTotal = getEmpAnnualLeaveUsed(emp.id, simulatedRow);
+            showToast(
+                `Booked ${autoBookLen} working days (${MONTHS_SHORT_EN[firstDay.m]} ${firstDay.d} – ${MONTHS_SHORT_EN[lastDay.m]} ${lastDay.d}) • Total: ${newTotal}/22d.`,
+                "success"
+            );
         }
 
         function commitEmployeeInteraction() {
@@ -1296,8 +1346,7 @@
             if (dragOp === "apply") {
                 const bookingTs = Date.now();
                 const bookingIso = new Date(bookingTs).toISOString();
-                for (let idx = 0; idx < selectedDays.length; idx++) {
-                    const item = selectedDays[idx];
+                for (const item of selectedDays) {
                     if (isBlockedForEmp(emp, item.m, item.d)) {
                         showToast(`Cannot book ${MONTHS_SHORT_EN[item.m]} ${item.d}: Global Block Period is active.`, "error");
                         return;
@@ -1328,26 +1377,25 @@
                 }
             }
 
-            const totalUsed = getEmpAnnualLeaveUsed(emp.id, simulatedRow);
-            if (totalUsed > MAX_BALANCE) {
-                showToast(`Cannot book: Exceeds your ${MAX_BALANCE}-day annual leave quota (${totalUsed}/${MAX_BALANCE} days).`, "error");
+            const check = validateAndEnforceLeavePolicy(emp.id, simulatedRow);
+            if (!check.ok) {
+                showToast(check.message, "error");
                 return;
             }
 
-            const periods = analyzeAnnualLeavePeriods(emp.id, simulatedRow);
-            if (periods.length > MAX_PERIODS) {
-                showToast(`Cannot book: Maximum ${MAX_PERIODS} leave periods allowed per year.`, "error");
-                return;
-            }
-
-            const autoCancelled = enforceSubTenDayAutoCancel(emp.id, simulatedRow);
             state.entries[empKey] = simulatedRow;
             persistState();
 
-            if (autoCancelled > 0) {
-                showToast("Leave periods under 10 working days were automatically cancelled.", "warning");
+            if (check.cancelled) {
+                showToast(check.message, "warning");
             } else {
-                showToast(dragOp === "apply" ? "Leave period booked." : "Leave days cleared.", "success");
+                const newTotal = getEmpAnnualLeaveUsed(emp.id, simulatedRow);
+                showToast(
+                    dragOp === "apply"
+                        ? `Leave period booked (${newTotal}/${MAX_BALANCE}d used • ${MAX_BALANCE - newTotal}d reserve).`
+                        : "Leave days cleared.",
+                    "success"
+                );
             }
         }
 
@@ -1397,21 +1445,19 @@
             }
             const pin = emp.pin;
             const recipient = emp.email ? emp.email.trim() : "";
-            const subject = encodeURIComponent("2027 Annual Leave Planner - Personal Access PIN");
+            const subject = encodeURIComponent("2027 Annual Leave Planner (EMS) - Personal Access PIN");
             const plannerUrl = window.location.href.split("#")[0];
             const bodyText =
                 `Hello ${emp.name},\n\n` +
                 `Your personal 4-digit PIN for the 2027 Annual Leave Planner is: ${pin}\n` +
                 `Planner Link: ${plannerUrl}\n\n` +
-                `Instructions:\n` +
-                `1. Open the planner link above and locate your name.\n` +
-                `2. Click on your row and enter your 4-digit PIN (${pin}).\n` +
-                `3. Click any available working day to automatically book 10 consecutive working days.\n\n` +
+                `Policy Summary:\n` +
+                `- Total Annual Quota: 22 working days (you may keep 0 to 5 working days as an optional emergency reserve).\n` +
+                `- Max 2 periods per year: at least one period must be >= 10 consecutive working days, and 2 periods must total between 17 and 22 working days (e.g., 7+10, 10+7, 12+5, or 12+10).\n\n` +
                 `Regards,`;
             const body = encodeURIComponent(bodyText);
             const mailtoUrl = `mailto:${recipient}?subject=${subject}&body=${body}`;
 
-            // Persist Admin session and launch mailto via hidden anchor element
             sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
             const mailLink = document.createElement("a");
             mailLink.href = mailtoUrl;
@@ -1423,13 +1469,13 @@
             showToast(
                 recipient
                     ? `Opening Outlook draft for ${emp.name} (${recipient})...`
-                    : `Opening Outlook draft for ${emp.name} (enter email in Outlook)...`,
+                    : `Opening Outlook draft for ${emp.name}...`,
                 "info"
             );
         }
 
         // =========================================================
-        // 7. Rendering Engine (365-Day Horizontal Timeline Matrix)
+        // 7. Rendering Engine
         // =========================================================
         function renderPreservingScroll() {
             const tableWrap = document.getElementById("scheduleTableWrapper");
@@ -1451,7 +1497,7 @@
             const wrapper = document.getElementById("scheduleTableWrapper");
             const targetTh = document.getElementById(`month-start-${mIdx}`);
             if (wrapper && targetTh) {
-                const stickyWidth = 345;
+                const stickyWidth = window.innerWidth <= 640 ? 185 : 345;
                 wrapper.scrollTo({
                     left: Math.max(0, targetTh.offsetLeft - stickyWidth),
                     behavior: "smooth"
@@ -1486,9 +1532,9 @@
             bar.classList.remove("hidden");
             titleEl.innerHTML = `Eid Holiday Work Preference (2027) — <span class="text-sky-600">${escapeHtml(emp.name)}</span>`;
 
-            const baseCls = "flex-1 px-3 py-1.5 rounded-lg border text-xs font-bold transition bg-white text-slate-700 border-slate-200 hover:bg-slate-50";
-            const willingActiveCls = "flex-1 px-3 py-1.5 rounded-lg border text-xs font-bold transition bg-emerald-600 text-white border-emerald-600 shadow-xs";
-            const offActiveCls = "flex-1 px-3 py-1.5 rounded-lg border text-xs font-bold transition bg-rose-600 text-white border-rose-600 shadow-xs";
+            const baseCls = "flex-1 px-2.5 py-1.5 rounded-lg border text-xs font-bold transition bg-white text-slate-700 border-slate-200 hover:bg-slate-50";
+            const willingActiveCls = "flex-1 px-2.5 py-1.5 rounded-lg border text-xs font-bold transition bg-emerald-600 text-white border-emerald-600 shadow-xs";
+            const offActiveCls = "flex-1 px-2.5 py-1.5 rounded-lg border text-xs font-bold transition bg-rose-600 text-white border-rose-600 shadow-xs";
 
             const btnFitrW = document.getElementById("btnEidFitrWilling");
             const btnFitrO = document.getElementById("btnEidFitrOff");
@@ -1528,7 +1574,7 @@
                 adminPriorityLog.classList.remove("hidden");
 
                 toggleText.textContent = "Exit Admin";
-                toggleBtn.className = "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition";
+                toggleBtn.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition";
 
                 renderAdminStatsAndLegend();
                 renderAdminBrushButtons();
@@ -1541,7 +1587,7 @@
                 adminPriorityLog.classList.add("hidden");
 
                 toggleText.textContent = "Admin Login";
-                toggleBtn.className = "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-900 text-white shadow-xs transition";
+                toggleBtn.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-900 text-white shadow-xs transition";
             }
 
             if (lockAllBtn) {
@@ -1603,9 +1649,9 @@
 
                 <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs flex items-center justify-between">
                     <div>
-                        <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Remaining Leave Pool</p>
+                        <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Unscheduled / Reserve</p>
                         <p class="text-xl font-black text-emerald-600 mt-0.5">${totalRemaining} <span class="text-xs font-bold text-slate-500">working days</span></p>
-                        <p class="text-[11px] font-semibold text-emerald-700 mt-0.5">Available across team</p>
+                        <p class="text-[11px] font-semibold text-emerald-700 mt-0.5">Includes 0–5d emergency reserves</p>
                     </div>
                     <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-sm">22d</div>
                 </div>
@@ -1652,7 +1698,7 @@
                     </span>
                 </div>
                 <div class="text-[11px] font-bold text-slate-500">
-                    Click any employee name to manage Name, Email, Lock &amp; PIN • Click ✉ to launch Outlook
+                    Tap any employee name to manage Name, Email, Lock &amp; PIN
                 </div>
             `;
         }
@@ -1675,7 +1721,7 @@
                     : "bg-white text-slate-800 border-slate-200 hover:bg-slate-50";
                 html += `
                     <button type="button" data-action="set-admin-brush" data-brush="${b.code}"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition ${cls}">
+                        class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold border transition ${cls}">
                         <span class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-black ${active ? "bg-white text-sky-700" : b.iconCls}">${b.icon}</span>
                         <span>${b.label}</span>
                     </button>
@@ -1742,7 +1788,7 @@
                 const validDuration = item.workingDays >= MIN_CONSECUTIVE_DAYS;
                 const durCls = validDuration
                     ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                    : "bg-amber-50 text-amber-800 border-amber-200";
+                    : "bg-sky-50 text-sky-800 border-sky-200";
 
                 return `
                     <tr class="hover:bg-slate-50/80 transition-colors">
@@ -1793,7 +1839,7 @@
 
                 return `
                     <button type="button" data-action="select-month" data-month="${mIdx}"
-                        class="px-3 py-1.5 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 shrink-0 ${cls}">
+                        class="px-2.5 sm:px-3 py-1.5 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 shrink-0 ${cls}">
                         <span>${shortName}</span>
                     </button>
                 `;
@@ -1804,20 +1850,21 @@
             const wrapper = document.getElementById("scheduleTableWrapper");
             if (!wrapper) return;
 
+            const isMobile = window.innerWidth <= 640;
+            const stickyW = isMobile ? 185 : 345;
             const previewSet = getDragPreviewSet();
             const visibleEmployees = (!state.isAdmin && state.showOnlyMyRow && state.unlockedEmpId !== null)
                 ? state.employees.filter(e => e.id === state.unlockedEmpId)
                 : state.employees;
 
-            let html = `<table class="w-full border-collapse text-center table-fixed" style="width: ${345 + (365 * 36)}px;">`;
+            let html = `<table class="w-full border-collapse text-center table-fixed" style="width: ${stickyW + (365 * 36)}px;">`;
 
-            // Top Month Group Header Row + Day Columns Header Row
             html += `<thead>`;
             html += `<tr class="border-b border-slate-200 bg-slate-100">`;
-            html += `<th rowspan="2" class="sticky-emp-col px-3 py-3 text-left bg-slate-50 border-r border-slate-200 align-middle">
+            html += `<th rowspan="2" class="sticky-emp-col px-2 sm:px-3 py-2.5 sm:py-3 text-left bg-slate-50 border-r border-slate-200 align-middle">
                 <div class="flex items-center justify-between gap-1">
-                    <span class="text-xs font-extrabold text-slate-800">Employee (2027 Full Year)</span>
-                    <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">Used / Rem.</span>
+                    <span class="text-[11px] sm:text-xs font-extrabold text-slate-800 truncate">${isMobile ? "Staff" : "Employee (2027)"}</span>
+                    <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">Used / Rem.</span>
                 </div>
             </th>`;
 
@@ -1826,7 +1873,7 @@
                 const bandCls = m % 2 === 0 ? "bg-slate-100 text-slate-800" : "bg-sky-50/80 text-sky-900";
                 html += `
                     <th id="month-start-${m}" colspan="${spanDays}" class="py-1.5 px-2 text-left text-[11px] font-black uppercase tracking-wider border-r border-slate-300 ${bandCls}">
-                        <span class="sticky left-[355px] inline-block">${MONTHS_SHORT_EN[m]} 2027</span>
+                        <span class="sticky inline-block" style="left: ${stickyW + 10}px;">${MONTHS_SHORT_EN[m]} 2027</span>
                     </th>
                 `;
             }
@@ -1883,12 +1930,14 @@
                     : "bg-slate-100 text-slate-400 border-slate-200";
                 const remCls = remaining === 0
                     ? "bg-emerald-100 text-emerald-800 border-emerald-300 font-extrabold"
-                    : "bg-slate-50 text-slate-600 border-slate-200 font-bold";
+                    : (remaining <= MAX_EMERGENCY_RESERVE
+                        ? "bg-amber-50 text-amber-800 border-amber-200 font-extrabold"
+                        : "bg-slate-50 text-slate-600 border-slate-200 font-bold");
 
                 let adminRowControls = "";
                 let adminEidBadges = "";
                 if (state.isAdmin) {
-                    const pinLabel = emp.pin ? `PIN: ${escapeHtml(emp.pin)}` : "No PIN";
+                    const pinLabel = emp.pin ? (isMobile ? emp.pin : `PIN: ${escapeHtml(emp.pin)}`) : "PIN";
                     const pinCls = emp.pin
                         ? "bg-sky-50 text-sky-800 border-sky-200 hover:bg-sky-100"
                         : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100";
@@ -1908,7 +1957,7 @@
                         : (emp.eidAdha === "off" ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-slate-50 text-slate-400 border-slate-200");
 
                     adminEidBadges = `
-                        <div class="flex items-center gap-1 mt-0.5">
+                        <div class="hidden sm:flex items-center gap-1 mt-0.5">
                             <span class="px-1 rounded border text-[8px] font-extrabold ${fitrCls}">Fitr: ${fitrSym}</span>
                             <span class="px-1 rounded border text-[8px] font-extrabold ${adhaCls}">Adha: ${adhaSym}</span>
                         </div>
@@ -1916,16 +1965,16 @@
 
                     adminRowControls = `
                         <button type="button" data-action="admin-edit-emp" data-emp="${emp.id}"
-                            class="px-1.5 py-0.5 rounded border text-[9px] font-bold transition ${pinCls}" title="Manage Employee Name, Email &amp; PIN">
+                            class="px-1.5 py-0.5 rounded border text-[9px] font-bold transition ${pinCls}" title="Manage Employee">
                             ${pinLabel}
                         </button>
                         <button type="button" data-action="admin-send-pin-outlook" data-emp="${emp.id}"
-                            class="px-1.5 py-0.5 rounded border text-[10px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200 transition"
-                            title="${emp.email ? `Send PIN via Outlook to ${escapeHtml(emp.email)}` : 'Send PIN via Outlook'}">
+                            class="hidden sm:inline-block px-1.5 py-0.5 rounded border text-[10px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200 transition"
+                            title="Send PIN via Outlook">
                             ✉
                         </button>
                         <button type="button" data-action="admin-toggle-emp-lock" data-emp="${emp.id}"
-                            class="px-1.5 py-0.5 rounded border text-[10px] font-bold transition ${lockCls}" title="${emp.locked ? 'Unlock Row' : 'Lock Row'}">
+                            class="px-1 py-0.5 rounded border text-[10px] font-bold transition ${lockCls}" title="${emp.locked ? 'Unlock Row' : 'Lock Row'}">
                             ${lockIcon}
                         </button>
                     `;
@@ -1936,24 +1985,24 @@
 
                 html += `<tr class="hover:bg-slate-50/60 transition-colors">`;
                 html += `
-                    <td class="sticky-emp-col px-2.5 py-2 text-left border-r border-slate-200">
+                    <td class="sticky-emp-col px-2 sm:px-2.5 py-2 text-left border-r border-slate-200">
                         <div class="flex items-center justify-between gap-1">
                             <div ${nameActionAttr} class="flex items-center gap-1.5 min-w-0 flex-1 ${nameCursor}">
-                                <span class="w-5 h-5 rounded-md bg-sky-600 text-white text-[11px] font-extrabold flex items-center justify-center shrink-0">
+                                <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-md bg-sky-600 text-white text-[10px] sm:text-[11px] font-extrabold flex items-center justify-center shrink-0">
                                     ${emp.id}
                                 </span>
                                 <div class="min-w-0 flex-1">
-                                    <div class="text-xs font-bold text-slate-900 truncate">${escapeHtml(emp.name)}</div>
-                                    ${state.isAdmin && emp.email ? `<div class="text-[9px] font-medium text-slate-400 truncate">${escapeHtml(emp.email)}</div>` : ""}
+                                    <div class="text-[11px] sm:text-xs font-bold text-slate-900 truncate">${escapeHtml(emp.name)}</div>
+                                    ${state.isAdmin && emp.email ? `<div class="hidden sm:block text-[9px] font-medium text-slate-400 truncate">${escapeHtml(emp.email)}</div>` : ""}
                                     ${adminEidBadges}
                                 </div>
                             </div>
                             <div class="flex items-center gap-1 shrink-0">
                                 ${adminRowControls}
-                                <span class="min-w-[28px] px-1 py-0.5 rounded border text-[9px] font-black text-center ${usedCls}" title="Used Working Days">
-                                    ${annualUsed} d
+                                <span class="px-1 py-0.5 rounded border text-[9px] font-black text-center ${usedCls}" title="Planned Leave Used">
+                                    ${annualUsed}/${MAX_BALANCE}
                                 </span>
-                                <span class="px-1.5 py-0.5 rounded border text-[9px] ${remCls}" title="Remaining Quota">
+                                <span class="hidden sm:inline-block px-1.5 py-0.5 rounded border text-[9px] ${remCls}" title="Remaining Quota / Emergency Reserve">
                                     ${remaining} left
                                 </span>
                             </div>
@@ -2062,15 +2111,13 @@
             ta.style.left = "-9999px";
             document.body.appendChild(ta);
             ta.select();
-            try {
-                document.execCommand("copy");
-            } catch (err) {}
+            try { document.execCommand("copy"); } catch (err) {}
             document.body.removeChild(ta);
         }
 
         function copyAllPinsToClipboard() {
             const lines = [
-                "2027 Annual Leave Planner — Employee PIN Directory",
+                "2027 Annual Leave Planner (THC / OCC EMS) — Employee PIN Directory",
                 `Planner Link: ${window.location.href.split("#")[0]}`,
                 "--------------------------------------------------"
             ];
@@ -2134,7 +2181,7 @@
         }
 
         function exportToCSV() {
-            let csv = "\uFEFFID,Employee Name,Work Email,PIN Status,Lock Status,Eid Al-Fitr,Eid Al-Adha,Annual Leave Used,Remaining Quota,Training Days,Custom Status Days,Annual Leave Dates,Training Dates,Custom Status Dates\n";
+            let csv = "\uFEFFID,Employee Name,Work Email,PIN Status,Lock Status,Eid Al-Fitr,Eid Al-Adha,Annual Leave Used,Emergency Reserve / Remaining,Training Days,Custom Status Days,Annual Leave Dates,Training Dates,Custom Status Dates\n";
 
             state.employees.forEach(emp => {
                 const row = state.entries[String(emp.id)] || {};
@@ -2167,7 +2214,6 @@
                 csv += `${emp.id},"${emp.name.replace(/"/g, '""')}","${(emp.email || "").replace(/"/g, '""')}","${pinText}","${lockText}","${fitrText}","${adhaText}",${used},${remaining},${trainingDates.length},${customDates.length},"${leaveDates.join(" | ") || "None"}","${trainingDates.join(" | ") || "None"}","${customDates.join(" | ") || "None"}"\n`;
             });
 
-            // Append Chronological Priority Order Table
             const logItems = buildChronologicalPriorityLog();
             csv += `\nPriority Rank,Employee Name,Leave Period,Start Date,End Date,Working Days,Exact Booking Timestamp\n`;
             logItems.forEach((item, idx) => {
@@ -2178,7 +2224,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = "Company_B_Annual_Leave_Planner_2027.csv";
+            a.download = "THC_OCC_EMS_Annual_Leave_Planner_2027.csv";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -2187,7 +2233,7 @@
         }
 
         // =========================================================
-        // 9. Event Delegation on document.body
+        // 9. Event Delegation
         // =========================================================
         document.body.addEventListener("click", (e) => {
             const actionEl = e.target.closest("[data-action]");
@@ -2410,22 +2456,18 @@
             }
         });
 
-        // Calendar Cell Mouse Down & Drag Handling
+        // Desktop Mouse & Mobile Touch Drag Support
         const tableWrapper = document.getElementById("scheduleTableWrapper");
         if (tableWrapper) {
-            tableWrapper.addEventListener("mousedown", (e) => {
-                if (e.button !== 0) return;
-                const cell = e.target.closest("[data-cell]");
-                if (!cell) return;
-
+            const startCellDrag = (cell) => {
                 const empId = Number(cell.dataset.emp);
                 const m = Number(cell.dataset.month);
                 const d = Number(cell.dataset.day);
                 const dateStr = cell.dataset.date;
-                if (isWeekend(m, d)) return;
+                if (isWeekend(m, d)) return false;
 
                 const emp = state.employees.find(item => item.id === empId);
-                if (!emp) return;
+                if (!emp) return false;
 
                 if (state.isAdmin) {
                     const existing = getCellEntry(emp.id, m, d);
@@ -2440,12 +2482,12 @@
                         renderPreservingScroll();
                         persistState();
                     }
-                    return;
+                    return true;
                 }
 
                 if (state.globalLock || emp.locked) {
                     showToast("Locked by Admin.", "error");
-                    return;
+                    return false;
                 }
 
                 if (state.unlockedEmpId !== emp.id) {
@@ -2454,13 +2496,13 @@
                     } else {
                         openEmpVerifyPinModal(emp);
                     }
-                    return;
+                    return false;
                 }
 
                 const existing = getCellEntry(emp.id, m, d);
                 if (existing && existing.type !== "L") {
                     showToast(`Cannot modify Admin-assigned "${existing.type}" status.`, "error");
-                    return;
+                    return false;
                 }
 
                 isDragging = true;
@@ -2469,13 +2511,11 @@
                 dragOp = (existing && existing.type === "L") ? "clear" : "apply";
                 dragStartDate = dateStr;
                 dragCurrentDate = dateStr;
-            });
+                return true;
+            };
 
-            tableWrapper.addEventListener("mouseover", (e) => {
-                if (!isDragging || dragEmpId === null) return;
-                const cell = e.target.closest("[data-cell]");
-                if (!cell) return;
-
+            const moveCellDrag = (cell) => {
+                if (!isDragging || dragEmpId === null || !cell) return;
                 const empId = Number(cell.dataset.emp);
                 if (empId !== dragEmpId) return;
 
@@ -2500,10 +2540,42 @@
                         renderPreservingScroll();
                     }
                 }
+            };
+
+            tableWrapper.addEventListener("mousedown", (e) => {
+                if (e.button !== 0) return;
+                const cell = e.target.closest("[data-cell]");
+                if (cell) startCellDrag(cell);
             });
+
+            tableWrapper.addEventListener("mouseover", (e) => {
+                const cell = e.target.closest("[data-cell]");
+                if (cell) moveCellDrag(cell);
+            });
+
+            tableWrapper.addEventListener("touchstart", (e) => {
+                if (e.touches.length !== 1) return;
+                const cell = e.target.closest("[data-cell]");
+                if (!cell) return;
+                const empId = Number(cell.dataset.emp);
+                if (state.isAdmin || state.unlockedEmpId === empId) {
+                    if (startCellDrag(cell)) {
+                        e.preventDefault();
+                    }
+                }
+            }, { passive: false });
+
+            tableWrapper.addEventListener("touchmove", (e) => {
+                if (!isDragging || e.touches.length !== 1) return;
+                e.preventDefault();
+                const touch = e.touches[0];
+                const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+                const cell = targetEl ? targetEl.closest("[data-cell]") : null;
+                if (cell) moveCellDrag(cell);
+            }, { passive: false });
         }
 
-        window.addEventListener("mouseup", () => {
+        const endDragInteraction = () => {
             if (!isDragging) return;
             const completedMode = dragMode;
             if (completedMode === "employee") {
@@ -2517,7 +2589,11 @@
             dragCurrentDate = null;
             dragVisited.clear();
             renderPreservingScroll();
-        });
+        };
+
+        window.addEventListener("mouseup", endDragInteraction);
+        window.addEventListener("touchend", endDragInteraction);
+        window.addEventListener("resize", renderCalendarTable);
 
         // =========================================================
         // 10. Modal Form Handlers
@@ -2575,7 +2651,7 @@
             closeModal("empCreatePinModal");
             renderPreservingScroll();
             persistState();
-            showToast(`PIN created for ${emp.name}. Click any working day to auto-book 10 working days.`, "success");
+            showToast(`PIN created for ${emp.name}. Tap or drag to book (17–22d planned, 0–5d reserve).`, "success");
         });
 
         document.getElementById("empVerifyPinForm").addEventListener("submit", (e) => {
@@ -2590,7 +2666,7 @@
                 state.unlockedEmpId = emp.id;
                 closeModal("empVerifyPinModal");
                 renderPreservingScroll();
-                showToast(`Row unlocked for ${emp.name}. Click any working day to auto-book 10 working days.`, "success");
+                showToast(`Row unlocked for ${emp.name}.`, "success");
             } else {
                 errEl.textContent = "Incorrect 4-digit PIN.";
                 errEl.classList.remove("hidden");
@@ -2720,7 +2796,6 @@
             showToast("Range action applied.", "success");
         });
 
-        // Boot Application
         loadFromLocalStorage();
         renderAll();
         initFirebase();
